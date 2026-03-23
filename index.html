@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Contra 2026 — A reimagination of the classic Contra as an AI-powered first-person shooter."
+    />
+    <title>Contra 2026 | FPS Reimagination</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Import map for Three.js ES modules (no build step needed) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════
+         API KEY SCREEN
+    ═══════════════════════════════════════════ -->
+    <div id="api-key-screen" class="overlay active">
+      <div class="overlay-panel">
+        <div class="logo-wrap">
+          <span class="logo-contra">CONTRA</span>
+          <span class="logo-year">2026</span>
+        </div>
+        <p class="tagline">Powered by Gemini AI · First-Person Reimagination</p>
+        <div class="field-group">
+          <label for="api-key-input">Gemini API Key</label>
+          <input
+            type="password"
+            id="api-key-input"
+            placeholder="AIza..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span class="field-hint">
+            Get a free key at
+            <a href="https://aistudio.google.com" target="_blank" rel="noopener">
+              aistudio.google.com
+            </a>
+          </span>
+        </div>
+        <button id="start-game-btn" class="btn-primary">DEPLOY OPERATIVE</button>
+        <p class="security-note">🔒 Your key is never stored — session-only, client-side only.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         TITLE / MAIN MENU SCREEN
+    ═══════════════════════════════════════════ -->
+    <div id="title-screen" class="overlay">
+      <div class="overlay-panel">
+        <div class="logo-wrap">
+          <span class="logo-contra">CONTRA</span>
+          <span class="logo-year">2026</span>
+        </div>
+        <p class="tagline">Red Falcon Never Died.</p>
+        <nav class="menu-nav">
+          <button id="menu-play-btn" class="btn-primary">▶ MISSION START</button>
+          <button id="menu-controls-btn" class="btn-secondary">⌨ CONTROLS</button>
+        </nav>
+        <div id="controls-panel" class="controls-panel hidden">
+          <table class="controls-table">
+            <tr><td>Move</td><td><kbd>W A S D</kbd></td></tr>
+            <tr><td>Look</td><td>Mouse</td></tr>
+            <tr><td>Shoot</td><td><kbd>Left Click</kbd></td></tr>
+            <tr><td>Sprint</td><td><kbd>Shift</kbd></td></tr>
+            <tr><td>Pause</td><td><kbd>Esc</kbd></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         MISSION BRIEF SCREEN (pre-level)
+    ═══════════════════════════════════════════ -->
+    <div id="mission-brief-screen" class="overlay">
+      <div class="overlay-panel brief-panel">
+        <div class="brief-header">
+          <span class="brief-level-tag">LEVEL <span id="brief-level-num">1</span></span>
+          <h2 id="brief-level-name">Jungle Outpost</h2>
+        </div>
+        <div class="brief-body">
+          <div id="brief-typing-text" class="brief-text typewriter"></div>
+          <div id="brief-loading" class="brief-loading">
+            <span class="dot-pulse"></span> Receiving transmission from Command...
+          </div>
+        </div>
+        <button id="brief-deploy-btn" class="btn-primary hidden">🚀 DEPLOY NOW</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         DEBRIEF SCREEN (post-level)
+    ═══════════════════════════════════════════ -->
+    <div id="debrief-screen" class="overlay">
+      <div class="overlay-panel brief-panel">
+        <div class="brief-header">
+          <span class="brief-level-tag">DEBRIEF</span>
+          <h2 id="debrief-title">Mission Complete</h2>
+        </div>
+        <div class="debrief-stats">
+          <div class="stat-row"><span>Enemies Eliminated</span><span id="db-kills">0</span></div>
+          <div class="stat-row"><span>Accuracy</span><span id="db-accuracy">0%</span></div>
+          <div class="stat-row"><span>Health Remaining</span><span id="db-health">0%</span></div>
+        </div>
+        <div id="debrief-ai-text" class="brief-text typewriter"></div>
+        <div id="debrief-loading" class="brief-loading">
+          <span class="dot-pulse"></span> Analysing performance...
+        </div>
+        <button id="debrief-next-btn" class="btn-primary hidden">NEXT MISSION ▶</button>
+        <button id="debrief-restart-btn" class="btn-secondary hidden">↺ RESTART</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         GAME OVER SCREEN
+    ═══════════════════════════════════════════ -->
+    <div id="gameover-screen" class="overlay">
+      <div class="overlay-panel">
+        <h1 class="gameover-title">OPERATIVE DOWN</h1>
+        <p class="gameover-sub">Red Falcon wins... this time.</p>
+        <button id="go-restart-btn" class="btn-primary">↺ TRY AGAIN</button>
+        <button id="go-menu-btn" class="btn-secondary">⌂ MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         VICTORY SCREEN
+    ═══════════════════════════════════════════ -->
+    <div id="victory-screen" class="overlay">
+      <div class="overlay-panel">
+        <h1 class="victory-title">RED FALCON DESTROYED</h1>
+        <p class="victory-sub">Earth is free. For now.</p>
+        <div id="victory-ai-text" class="brief-text typewriter" style="margin-top:1rem"></div>
+        <button id="vic-menu-btn" class="btn-primary" style="margin-top:2rem">⌂ MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         GAME CANVAS + HUD
+    ═══════════════════════════════════════════ -->
+    <div id="game-container" class="hidden">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- HUD -->
+      <div id="hud">
+        <div id="hud-left">
+          <div class="hud-label">HP</div>
+          <div id="hud-health-bar-wrap">
+            <div id="hud-health-bar"></div>
+          </div>
+          <div id="hud-health-val">100</div>
+        </div>
+
+        <div id="hud-center">
+          <div id="hud-level-name">LEVEL 1 · JUNGLE OUTPOST</div>
+          <div id="hud-crosshair">
+            <div class="ch-h"></div>
+            <div class="ch-v"></div>
+          </div>
+        </div>
+
+        <div id="hud-right">
+          <div class="hud-label">SCORE</div>
+          <div id="hud-score">000000</div>
+          <div class="hud-label" style="margin-top:0.5rem">AMMO</div>
+          <div id="hud-ammo">∞</div>
+        </div>
+
+        <!-- Kill feed -->
+        <div id="hud-killfeed"></div>
+
+        <!-- Taunt area -->
+        <div id="hud-taunt"></div>
+
+        <!-- Hint area -->
+        <div id="hud-hint"></div>
+      </div>
+
+      <!-- Pointer lock overlay (click to start) -->
+      <div id="lock-overlay">
+        <p>Click anywhere to enter battle</p>
+        <p class="lock-sub">Press <kbd>Esc</kbd> to pause</p>
+      </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
