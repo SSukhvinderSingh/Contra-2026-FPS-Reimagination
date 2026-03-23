@@ -39,6 +39,12 @@ export class LevelManager {
   _hintCooldown = false;
   _tauntInterval = null;
 
+  /** @type {import('../ui/EnemyHealthBars.js').EnemyHealthBars|null} */
+  _healthBars = null;
+
+  /** @type {import('../game/Weapon.js').Weapon|null} */
+  _weapon = null;
+
   _raycaster = new THREE.Raycaster();
 
   /** Callbacks wired by main.js */
@@ -80,6 +86,12 @@ export class LevelManager {
 
     this._enemies = result.enemies;
     this._exitPos.copy(result.exitPos);
+
+    // Register enemies with health bars UI
+    if (this._healthBars) {
+      this._healthBars.clear();
+      this._enemies.forEach((e) => this._healthBars.track(e));
+    }
 
     // Reset player
     this._player.reset(result.spawnPos);
@@ -125,6 +137,22 @@ export class LevelManager {
   /** Expose world for player collision checks. */
   get world() { return this._world; }
 
+  /**
+   * Register the weapon viewmodel so LevelManager can trigger fire FX.
+   * @param {import('../game/Weapon.js').Weapon} weapon
+   */
+  setWeapon(weapon) {
+    this._weapon = weapon;
+  }
+
+  /**
+   * Register the health bars UI system.
+   * @param {import('../ui/EnemyHealthBars.js').EnemyHealthBars} healthBars
+   */
+  setHealthBars(healthBars) {
+    this._healthBars = healthBars;
+  }
+
   // ─── Game Loop Tick ───────────────────────────────────────────────────────
 
   /**
@@ -132,7 +160,7 @@ export class LevelManager {
    * @param {number} delta
    */
   update(delta) {
-    const cam = this._player._camera;
+    const cam = this._player.camera;
 
     // Update all living enemies
     for (const enemy of this._enemies) {
@@ -158,13 +186,18 @@ export class LevelManager {
    * @param {THREE.Vector3} direction
    */
   _handleShot(origin, direction) {
+    // Always trigger weapon fire FX
+    if (this._weapon) this._weapon.fire();
+
     this._raycaster.set(origin, direction.normalize());
 
     let hit = false;
     for (const enemy of this._enemies) {
       if (!enemy.isDead && enemy.intersectsRay(this._raycaster)) {
-        enemy.takeDamage(25);
+        const dmg = 25;
+        enemy.takeDamage(dmg);
         this._player.shotsHit++;
+        this._hud.showDamageNumber(dmg);
         hit = true;
         break; // one bullet, one enemy
       }
@@ -179,14 +212,25 @@ export class LevelManager {
 
   /** @private */
   _triggerLevelComplete() {
+    // Guard: only fire once
+    if (this._levelCompleting) return;
+    this._levelCompleting = true;
+
     this._clearTauntInterval();
     this._audio.playLevelComplete();
+    this._hud.showCompleteBanner(
+      this._currentLevelIndex >= TOTAL_LEVELS - 1 ? 'RED FALCON DESTROYED' : 'SECTOR CLEARED'
+    );
 
-    if (this._currentLevelIndex >= TOTAL_LEVELS - 1) {
-      if (this.onVictory) this.onVictory();
-    } else {
-      if (this.onLevelComplete) this.onLevelComplete();
-    }
+    // Brief delay so banner shows before screen transitions
+    setTimeout(() => {
+      this._levelCompleting = false;
+      if (this._currentLevelIndex >= TOTAL_LEVELS - 1) {
+        if (this.onVictory) this.onVictory();
+      } else {
+        if (this.onLevelComplete) this.onLevelComplete();
+      }
+    }, 2000);
   }
 
   // ─── Player Death ─────────────────────────────────────────────────────────

@@ -1,7 +1,8 @@
 /**
  * HUD.js
  * Manages all 2D overlay UI during gameplay:
- * health bar, score, kill feed, enemy taunts, and adaptive hints.
+ * health bar, score, kill feed, enemy taunts, adaptive hints,
+ * floating damage numbers, and level complete banner.
  */
 
 export class HUD {
@@ -14,9 +15,10 @@ export class HUD {
   _hintEl       = document.getElementById('hud-hint');
   _levelNameEl  = document.getElementById('hud-level-name');
   _damageFlash  = null;
+  _tauntTimer   = null;
+  _hintTimer    = null;
 
   constructor() {
-    // Inject damage flash element lazily
     this._damageFlash = document.getElementById('damage-flash');
     if (!this._damageFlash) {
       this._damageFlash = document.createElement('div');
@@ -25,7 +27,7 @@ export class HUD {
     }
   }
 
-  // ─── Health ───────────────────────────────────────────────────────────────
+  // --- Health ------------------------------------------------------------------
 
   /**
    * @param {number} current
@@ -36,7 +38,6 @@ export class HUD {
     this._healthBar.style.width = `${pct}%`;
     this._healthVal.textContent = Math.ceil(current);
 
-    // Colour shift: green → amber → red
     if (pct > 50) {
       this._healthBar.style.background = 'linear-gradient(90deg, #ff2233, #ff6644)';
     } else if (pct > 25) {
@@ -46,46 +47,41 @@ export class HUD {
     }
   }
 
-  // ─── Score ────────────────────────────────────────────────────────────────
+  // --- Score ------------------------------------------------------------------
 
   /** @param {number} score */
   setScore(score) {
     this._scoreEl.textContent = String(score).padStart(6, '0');
   }
 
-  // ─── Ammo ─────────────────────────────────────────────────────────────────
+  // --- Ammo -------------------------------------------------------------------
 
-  /** @param {number|'∞'} ammo */
+  /** @param {number|string} ammo */
   setAmmo(ammo) {
     this._ammoEl.textContent = ammo;
   }
 
-  // ─── Level name ───────────────────────────────────────────────────────────
+  // --- Level Name -------------------------------------------------------------
 
   /** @param {string} name */
   setLevelName(name) {
     this._levelNameEl.textContent = name;
   }
 
-  // ─── Kill Feed ────────────────────────────────────────────────────────────
+  // --- Kill Feed --------------------------------------------------------------
 
-  /** @param {string} message e.g. "Enemy Eliminated" */
+  /** @param {string} message */
   pushKillfeed(message) {
     const item = document.createElement('div');
     item.className = 'killfeed-item';
-    item.textContent = `✖ ${message}`;
+    item.textContent = `x ${message}`;
     this._killfeed.prepend(item);
-
-    // Auto-remove after animation
     setTimeout(() => item.remove(), 2000);
   }
 
-  // ─── Enemy Taunt ──────────────────────────────────────────────────────────
+  // --- Enemy Taunt ------------------------------------------------------------
 
-  /**
-   * Show an enemy taunt line for a few seconds.
-   * @param {string} text
-   */
+  /** @param {string} text */
   showTaunt(text) {
     this._tauntEl.textContent = `"${text}"`;
     this._tauntEl.classList.add('visible');
@@ -95,15 +91,14 @@ export class HUD {
     }, 4000);
   }
 
-  // ─── Adaptive Hint ────────────────────────────────────────────────────────
+  // --- Adaptive Hint ----------------------------------------------------------
 
   /**
-   * Show a hint from Gemini.
    * @param {string} text
    * @param {number} [durationMs=7000]
    */
   showHint(text, durationMs = 7000) {
-    this._hintEl.textContent = `💡 ${text}`;
+    this._hintEl.textContent = `Tip: ${text}`;
     this._hintEl.classList.add('visible');
     clearTimeout(this._hintTimer);
     this._hintTimer = setTimeout(() => {
@@ -111,12 +106,45 @@ export class HUD {
     }, durationMs);
   }
 
-  // ─── Damage Flash ─────────────────────────────────────────────────────────
+  // --- Damage Flash -----------------------------------------------------------
 
   flash() {
     this._damageFlash.classList.remove('active');
-    // Force reflow to restart animation
-    void this._damageFlash.offsetWidth;
+    void this._damageFlash.offsetWidth; // force reflow
     this._damageFlash.classList.add('active');
+  }
+
+  // --- Floating Damage Number -------------------------------------------------
+
+  /**
+   * Spawn a floating "-25" number near screen centre that drifts up and fades.
+   * @param {number} damage
+   */
+  showDamageNumber(damage) {
+    const el = document.createElement('div');
+    el.className = 'damage-number';
+    el.textContent = `-${damage}`;
+
+    const cx = window.innerWidth  / 2 + (Math.random() - 0.5) * 70;
+    const cy = window.innerHeight / 2 + (Math.random() - 0.5) * 30;
+    el.style.left = `${cx}px`;
+    el.style.top  = `${cy}px`;
+
+    document.getElementById('game-container').appendChild(el);
+    setTimeout(() => el.remove(), 700);
+  }
+
+  // --- Level Complete Banner --------------------------------------------------
+
+  /**
+   * Flash a big banner message that auto-removes after 2.5s.
+   * @param {string} [text='SECTOR CLEARED']
+   */
+  showCompleteBanner(text = 'SECTOR CLEARED') {
+    const el = document.createElement('div');
+    el.className = 'complete-banner';
+    el.textContent = text;
+    document.getElementById('game-container').appendChild(el);
+    setTimeout(() => el.remove(), 2500);
   }
 }

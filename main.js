@@ -9,13 +9,15 @@
  *   → gameover-screen (lose) → restart options
  */
 
-import { Renderer }      from './src/engine/Renderer.js';
-import { InputHandler }  from './src/engine/InputHandler.js';
-import { AudioManager }  from './src/engine/AudioManager.js';
-import { GeminiService } from './src/ai/GeminiService.js';
-import { Player }        from './src/game/Player.js';
-import { LevelManager }  from './src/game/LevelManager.js';
-import { HUD }           from './src/ui/HUD.js';
+import { Renderer }         from './src/engine/Renderer.js';
+import { InputHandler }     from './src/engine/InputHandler.js';
+import { AudioManager }     from './src/engine/AudioManager.js';
+import { GeminiService }    from './src/ai/GeminiService.js';
+import { Player }           from './src/game/Player.js';
+import { LevelManager }     from './src/game/LevelManager.js';
+import { Weapon }           from './src/game/Weapon.js';
+import { HUD }              from './src/ui/HUD.js';
+import { EnemyHealthBars }  from './src/ui/EnemyHealthBars.js';
 
 // ─── DOM References ───────────────────────────────────────────────────────────
 
@@ -36,7 +38,7 @@ const lockOverlay   = $('lock-overlay');
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
-let renderer, input, audio, gemini, player, levelManager, hud;
+let renderer, input, audio, gemini, player, levelManager, hud, weapon, enemyHealthBars;
 let currentLevelIndex = 0;
 let gameActive        = false;
 
@@ -96,6 +98,13 @@ function initSystems(apiKey) {
   hud          = new HUD();
   player       = new Player(renderer.camera, input, audio);
   levelManager = new LevelManager(renderer.scene, player, hud, audio, gemini);
+  weapon       = new Weapon(renderer.renderer, renderer.camera);
+  enemyHealthBars = new EnemyHealthBars();
+
+  // Expose health bars to LevelManager so it can track new enemies
+  levelManager.setHealthBars(enemyHealthBars);
+  // Expose weapon so LevelManager can trigger fire FX
+  levelManager.setWeapon(weapon);
 
   // Wire level events
   levelManager.onLevelComplete = () => showDebrief(false);
@@ -105,9 +114,14 @@ function initSystems(apiKey) {
   // Game tick
   renderer.onTick((delta) => {
     if (!gameActive) return;
+    const isMoving = input.isForward() || input.isBackward() || input.isLeft() || input.isRight();
     player.update(delta, levelManager.world);
     levelManager.update(delta);
+    weapon.setMoving(isMoving && input.isPointerLocked);
+    weapon.update(delta);
+    weapon.renderOnTop();
     hud.setHealth(player.health, player.maxHealth);
+    enemyHealthBars.update(renderer.camera);
   });
 
   // Pointer lock UI

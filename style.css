@@ -604,3 +604,44 @@ kbd {
   border-right: 2px solid var(--col-red);
   animation: blink-cursor 0.7s step-end infinite;
 }
+
+/* --- Floating Damage Numbers -------------------------------------------- */
+.damage-number {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ff4455;
+  text-shadow: 0 0 8px rgba(255,34,51,0.8);
+  pointer-events: none;
+  z-index: 8;
+  animation: damage-float 0.7s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+@keyframes damage-float {
+  0%   { opacity: 1; transform: translate(-50%, -50%); }
+  100% { opacity: 0; transform: translate(-50%, calc(-50% - 40px)); }
+}
+
+/* --- Level Complete Banner ---------------------------------------------- */
+.complete-banner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: var(--col-green);
+  text-shadow: 0 0 30px rgba(0,255,136,0.9), 0 0 60px rgba(0,255,136,0.4);
+  pointer-events: none;
+  z-index: 8;
+  animation: banner-in-out 2.5s ease forwards;
+}
+@keyframes banner-in-out {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  85%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+

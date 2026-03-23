@@ -67,6 +67,9 @@ export class Player {
     this._footstepTimer = 0;
   }
 
+  /** Expose camera for external reads (e.g. LevelManager enemy update). */
+  get camera() { return this._camera; }
+
   /**
    * Called every tick from the game loop.
    * @param {number} delta - seconds since last frame
