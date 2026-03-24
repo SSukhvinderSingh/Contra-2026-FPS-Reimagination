@@ -156,10 +156,10 @@ async function showMissionBrief(levelIndex) {
 
   const meta = (await import('./src/levels/index.js')).LEVEL_META[levelIndex];
 
-  $('brief-level-num').textContent = meta.number;
+  $('brief-level-num').textContent  = meta.number;
   $('brief-level-name').textContent = meta.name;
 
-  const textEl = $('brief-typing-text');
+  const textEl    = $('brief-typing-text');
   const loadingEl = $('brief-loading');
   const deployBtn = $('brief-deploy-btn');
 
@@ -167,9 +167,12 @@ async function showMissionBrief(levelIndex) {
   loadingEl.classList.remove('hidden');
   deployBtn.classList.add('hidden');
 
+  // Assign handler NOW (not at boot-time) so it always fires
+  deployBtn.onclick = () => startLevel(currentLevelIndex);
+
   showScreen('missionBrief');
 
-  // Fetch briefing from Gemini while the loading indicator shows
+  // Fetch briefing — always resolves (fallback on error)
   const brief = await gemini.getMissionBriefing(meta);
   loadingEl.classList.add('hidden');
 
@@ -177,24 +180,26 @@ async function showMissionBrief(levelIndex) {
   deployBtn.classList.remove('hidden');
 }
 
-function bindBriefDeploy() {
-  $('brief-deploy-btn').addEventListener('click', () => {
-    startLevel(currentLevelIndex);
-  });
-}
+// bindBriefDeploy is no longer needed — handler assigned in showMissionBrief()
+function bindBriefDeploy() { /* no-op — kept for safety */ }
 
 // ─── Start Level ──────────────────────────────────────────────────────────────
 
 function startLevel(index) {
-  gameActive = false;
-  levelManager.loadLevel(index);
-  showScreen('game');
-  lockOverlay.classList.remove('hidden');
-  // Small delay lets the overlay render before we lock
-  setTimeout(() => {
-    canvas.requestPointerLock();
-    gameActive = true;
-  }, 300);
+  try {
+    gameActive = false;
+    music.stop();
+    levelManager.loadLevel(index);
+    showScreen('game');
+    lockOverlay.classList.remove('hidden');
+    // Small delay lets the overlay render before we lock
+    setTimeout(() => {
+      canvas.requestPointerLock();
+      gameActive = true;
+    }, 300);
+  } catch (err) {
+    console.error('[startLevel] Failed to load level', index, err);
+  }
 }
 
 // ─── Debrief Screen ───────────────────────────────────────────────────────────
