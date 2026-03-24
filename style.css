@@ -66,7 +66,7 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, #0a0a18 0%, #020204 100%);
+  background: transparent;   /* particle canvas shows through */
   z-index: 100;
   opacity: 0;
   pointer-events: none;
@@ -804,7 +804,7 @@ kbd {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  z-index: 99;         /* above page, visible through transparent .overlay */
   pointer-events: none;
 }
 
@@ -838,9 +838,13 @@ kbd {
 }
 
 /* ─── DEPLOY Button Pulse ─────────────────────────────────────── */
+/* NOTE: do NOT set animation here because .anim-fade-in also sets
+   animation. Instead, use a CSS custom property or chain via delay.
+   The pulse runs on animationend of the fade-in. */
 #start-game-btn {
-  animation: btnPulse 2.5s ease-in-out infinite;
-  animation-delay: 1s;
+  animation:
+    fadeSlideUp 0.6s ease forwards,
+    btnPulse 2.5s 1.2s ease-in-out infinite;
 }
 @keyframes btnPulse {
   0%, 100% { box-shadow: 0 0 10px rgba(255,34,51,.3); }
