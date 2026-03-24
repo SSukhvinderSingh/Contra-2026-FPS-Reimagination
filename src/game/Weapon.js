@@ -94,6 +94,9 @@ export class Weapon {
     this._weaponCam   = new THREE.PerspectiveCamera(
       60, window.innerWidth / window.innerHeight, 0.01, 20
     );
+    // Camera must be in the weapon scene so its transform propagates to children
+    this._weaponScene.add(this._weaponCam);
+
     window.addEventListener('resize', () => {
       this._weaponCam.aspect = window.innerWidth / window.innerHeight;
       this._weaponCam.updateProjectionMatrix();
@@ -151,7 +154,12 @@ export class Weapon {
     this._muzzleTip.position.set(0, 0.02, -0.34);
     this._group.add(this._muzzleTip);
 
-    this._weaponScene.add(this._group);
+    // Gun group is a CHILD of the weapon camera.
+    // This means the gun lives in camera-local space:
+    //   • Position (restPos + bob + sway) is always relative to camera corner
+    //   • Rotation follows the camera quaternion automatically
+    //   • Gun barrel always points in the same direction as the crosshair ✓
+    this._weaponCam.add(this._group);
   }
 
   /** @private */
@@ -275,6 +283,11 @@ export class Weapon {
     // The gun mesh is in camera-local space — it must NOT rotate with the
     // world camera or it will drift off screen. Sway is achieved by
     // offsetting the group position/rotation, not the camera quaternion.
+
+    // ── Sync weapon camera to main camera so barrel follows crosshair ────
+    // Gun group is camera-local, so it stays screen-locked (lower-right)
+    // AND rotates to aim where the crosshair points — correct FPS behaviour.
+    this._weaponCam.quaternion.copy(this._mainCamera.quaternion);
   }
 
   /**
