@@ -189,22 +189,40 @@ export class LevelManager {
     // Always trigger weapon fire FX
     if (this._weapon) this._weapon.fire();
 
-    this._raycaster.set(origin, direction.normalize());
+    // Clone direction to avoid mutating the player's look vector
+    this._raycaster.set(origin, direction.clone().normalize());
 
-    let hit = false;
+    // Build a map from every living enemy's mesh child → enemy instance.
+    // We need this to identify WHICH enemy was hit after intersectObjects.
+    /** @type {Map<THREE.Mesh, import('./Enemy.js').Enemy>} */
+    const meshToEnemy = new Map();
+    const shootableMeshes = [];
+
     for (const enemy of this._enemies) {
-      if (!enemy.isDead && enemy.intersectsRay(this._raycaster)) {
-        const dmg = 25;
-        enemy.takeDamage(dmg);
-        this._player.shotsHit++;
-        this._hud.showDamageNumber(dmg);
-        hit = true;
-        break; // one bullet, one enemy
+      if (!enemy.isDead) {
+        enemy.mesh.traverse((child) => {
+          if (child.isMesh) {
+            meshToEnemy.set(child, enemy);
+            shootableMeshes.push(child);
+          }
+        });
       }
     }
 
-    if (!hit) {
-      // Bullet spark on wall hit (optional visual — skip for MVP)
+    if (shootableMeshes.length === 0) return;
+
+    // intersectObjects returns results sorted nearest-first.
+    // We only care about the very first (closest) hit.
+    const hits = this._raycaster.intersectObjects(shootableMeshes, false);
+
+    if (hits.length > 0) {
+      const hitEnemy = meshToEnemy.get(hits[0].object);
+      if (hitEnemy && !hitEnemy.isDead) {
+        const dmg = 25;
+        hitEnemy.takeDamage(dmg);
+        this._player.shotsHit++;
+        this._hud.showDamageNumber(dmg);
+      }
     }
   }
 
