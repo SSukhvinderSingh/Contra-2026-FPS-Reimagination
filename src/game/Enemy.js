@@ -40,9 +40,15 @@ export class Enemy {
   /** @type {import('../engine/AudioManager.js').AudioManager} */
   _audio;
 
+  /** Raycaster used for line-of-sight check before attacking. */
+  _losRaycaster = new THREE.Raycaster();
+  /** @type {THREE.Mesh[]} Wall meshes the LOS ray tests against. */
+  _wallMeshes = [];
+
   // Reuse vectors
   _toPlayer = new THREE.Vector3();
   _toTarget = new THREE.Vector3();
+  _losDir   = new THREE.Vector3();
 
   /**
    * @param {THREE.Scene} scene
@@ -172,10 +178,44 @@ export class Enemy {
     this._faceDirection(new THREE.Vector3().subVectors(playerPos, this.mesh.position));
 
     if (this._attackTimer === 0) {
-      this._audio.playShoot();
-      if (this.onDamagePlayer) this.onDamagePlayer(ENEMY_DAMAGE);
+      // Only damage player if no wall blocks the bullet path
+      if (this._hasLineOfSight(playerPos)) {
+        this._audio.playShoot();
+        if (this.onDamagePlayer) this.onDamagePlayer(ENEMY_DAMAGE);
+      }
       this._attackTimer = ATTACK_COOLDOWN;
     }
+  }
+
+  /**
+   * True when the enemy has a clear bullet path to the player.
+   * Raycasts from torso to playerPos and returns false if any wall
+   * mesh intersects the ray before it reaches the player.
+   * @private
+   * @param {THREE.Vector3} playerPos
+   * @returns {boolean}
+   */
+  _hasLineOfSight(playerPos) {
+    if (this._wallMeshes.length === 0) return true;
+
+    const origin = this.mesh.position.clone().setY(this.mesh.position.y + 0.8);
+    const dist   = origin.distanceTo(playerPos);
+
+    this._losDir.subVectors(playerPos, origin).normalize();
+    this._losRaycaster.set(origin, this._losDir);
+    this._losRaycaster.far = dist; // don't test past the player
+
+    const hits = this._losRaycaster.intersectObjects(this._wallMeshes, false);
+    return hits.length === 0; // no walls between enemy and player → clear shot
+  }
+
+  /**
+   * Register the level's wall meshes so this enemy performs LOS checks.
+   * Must be called after level geometry is built.
+   * @param {THREE.Mesh[]} meshes
+   */
+  setWallMeshes(meshes) {
+    this._wallMeshes = meshes;
   }
 
   /** @private */

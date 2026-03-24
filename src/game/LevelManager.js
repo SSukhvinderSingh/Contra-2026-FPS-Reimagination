@@ -100,6 +100,9 @@ export class LevelManager {
 
     // Wire enemy callbacks
     this._enemies.forEach((e) => {
+      // Give each enemy the level's wall meshes for line-of-sight checks
+      e.setWallMeshes(this._world.wallMeshes);
+
       e.onDamagePlayer = (dmg) => {
         this._player.takeDamage(dmg);
         this._hud.flash();

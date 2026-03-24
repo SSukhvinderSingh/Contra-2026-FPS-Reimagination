@@ -35,6 +35,8 @@ export class World {
   _walls = [];
   /** @type {THREE.Object3D[]} */
   _objects = [];
+  /** @type {THREE.Mesh[]} wall meshes only — used for enemy LOS raycasting */
+  _wallMeshList = [];
 
   /** @param {THREE.Scene} scene */
   constructor(scene) {
@@ -48,6 +50,7 @@ export class World {
     }
     this._objects = [];
     this._walls   = [];
+    this._wallMeshList = [];
   }
 
   // ─── Geometry Helpers ─────────────────────────────────────────────────────
@@ -94,10 +97,17 @@ export class World {
     mesh.castShadow    = true;
     mesh.receiveShadow = true;
     this._add(mesh);
+    this._wallMeshList.push(mesh); // track for LOS raycasting
 
     // Register AABB
     this._walls.push(new Wall(cx - w / 2, cx + w / 2, cz - d / 2, cz + d / 2));
   }
+
+  /**
+   * Wall meshes only — used by enemies for line-of-sight raycasting.
+   * @returns {THREE.Mesh[]}
+   */
+  get wallMeshes() { return this._wallMeshList; }
 
   /**
    * Add a decorative static prop (box, no collision).
