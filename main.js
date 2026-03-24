@@ -20,9 +20,11 @@ import { Weapon }           from './src/game/Weapon.js';
 import { HUD }              from './src/ui/HUD.js';
 import { EnemyHealthBars }  from './src/ui/EnemyHealthBars.js';
 import { Leaderboard }      from './src/engine/Leaderboard.js';
+import { ParticleSystem }   from './src/engine/ParticleSystem.js';
 
-// Module-level music (lives across all screens)
-const music = new MusicManager();
+// Module-level singletons (live across all screens)
+const music    = new MusicManager();
+const particles = new ParticleSystem(document.getElementById('particle-canvas'));
 
 // ─── DOM References ───────────────────────────────────────────────────────────
 
@@ -61,9 +63,11 @@ function showScreen(screen) {
 
   if (screen === 'game') {
     gameContainer.classList.remove('hidden');
+    particles.stop(); // pause particle canvas during gameplay
     return;
   }
 
+  particles.start(); // resume particles on any menu/overlay screen
   if (screens[screen]) {
     screens[screen].classList.add('active');
   }
@@ -363,6 +367,7 @@ function renderLeaderboard() {
 // ─── Boot Sequence ────────────────────────────────────────────────────────────
 
 function boot() {
+  particles.start(); // begin canvas animation immediately on page load
   showScreen('apiKey');
 
   $('start-game-btn').addEventListener('click', () => {
