@@ -271,8 +271,10 @@ export class Weapon {
       this._tracer.material.opacity = Math.max(0, this._tracerTimer / TRACER_DURATION) * 0.7;
     }
 
-    // ── Sync weapon camera quaternion to main camera ───────────────────
-    this._weaponCam.quaternion.copy(this._mainCamera.quaternion);
+    // NOTE: Weapon camera intentionally keeps identity quaternion.
+    // The gun mesh is in camera-local space — it must NOT rotate with the
+    // world camera or it will drift off screen. Sway is achieved by
+    // offsetting the group position/rotation, not the camera quaternion.
   }
 
   /**
