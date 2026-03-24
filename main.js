@@ -225,21 +225,34 @@ async function showDebrief(isVictory) {
   $('db-health').textContent = `${stats.healthRemaining}%`;
   $('debrief-title').textContent = isVictory ? 'All Objectives Complete' : 'Sector Cleared';
 
-  const aiTextEl = $('debrief-ai-text');
-  const loadingEl = $('debrief-loading');
-  const nextBtn = $('debrief-next-btn');
+  const aiTextEl   = $('debrief-ai-text');
+  const loadingEl  = $('debrief-loading');
+  const nextBtn    = $('debrief-next-btn');
   const restartBtn = $('debrief-restart-btn');
+  const menuBtn    = $('debrief-menu-btn');
 
   aiTextEl.textContent = '';
   loadingEl.classList.remove('hidden');
   nextBtn.classList.add('hidden');
   restartBtn.classList.add('hidden');
+  menuBtn.classList.add('hidden');
 
   showScreen('debrief');
 
   const debrief = await gemini.getDebrief(meta, stats);
   loadingEl.classList.add('hidden');
   await typewrite(aiTextEl, debrief);
+
+  // Exit to menu — always available
+  menuBtn.classList.remove('hidden');
+  menuBtn.onclick = () => {
+    currentLevelIndex = 0;
+    _gameStartTime = null; // reset run timer
+    renderer.start();
+    music.start();
+    showScreen('title');
+    renderLeaderboard();
+  };
 
   if (currentLevelIndex < 4) {
     nextBtn.classList.remove('hidden');

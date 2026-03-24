@@ -62,25 +62,29 @@ export class Enemy {
   _buildMesh(scene, spawnPos) {
     this.mesh = new THREE.Group();
 
-    const bodyMat = new THREE.MeshStandardMaterial({ color: BODY_COLOR, roughness: 0.8 });
-    const headMat = new THREE.MeshStandardMaterial({ color: HEAD_COLOR, roughness: 0.7 });
+    // Clone materials per-instance so mutating color on one enemy
+    // NEVER affects any other enemy (shared prototype trap).
+    this._bodyMat   = new THREE.MeshStandardMaterial({ color: BODY_COLOR, roughness: 0.8 });
+    this._headMat   = new THREE.MeshStandardMaterial({ color: HEAD_COLOR, roughness: 0.7 });
+    this._helmetMat = new THREE.MeshStandardMaterial({ color: 0x2a3a28, roughness: 0.9 });
+    this._gunMat    = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
 
     // Body
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.0, 0.4), bodyMat);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.0, 0.4), this._bodyMat);
     body.position.y = 0.5;
     body.castShadow = true;
     this.mesh.add(body);
 
     // Head
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), headMat);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), this._headMat);
     head.position.y = 1.25;
     head.castShadow = true;
     this.mesh.add(head);
 
-    // Helmet (box on top of head)
+    // Helmet
     const helmet = new THREE.Mesh(
       new THREE.BoxGeometry(0.45, 0.15, 0.45),
-      new THREE.MeshStandardMaterial({ color: 0x2a3a28, roughness: 0.9 })
+      this._helmetMat
     );
     helmet.position.y = 1.55;
     this.mesh.add(helmet);
@@ -88,7 +92,7 @@ export class Enemy {
     // Gun barrel stub
     const gun = new THREE.Mesh(
       new THREE.BoxGeometry(0.08, 0.08, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 })
+      this._gunMat
     );
     gun.position.set(0.3, 0.85, -0.3);
     this.mesh.add(gun);
@@ -233,10 +237,11 @@ export class Enemy {
   /** AABB check — is a ray origin+dir hitting this enemy? */
   intersectsRay(raycaster) {
     if (this.isDead) return false;
-    // Use a sphere approximation for the body
+    // Tight sphere (0.45) prevents adjacent-patrol enemies from chain-dying.
+    // Centre raised to torso height (y+0.8).
     const sphere = new THREE.Sphere(
       this.mesh.position.clone().setY(this.mesh.position.y + 0.8),
-      0.7
+      0.45
     );
     return raycaster.ray.intersectsSphere(sphere, new THREE.Vector3()) !== null;
   }
