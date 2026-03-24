@@ -5,7 +5,7 @@
  */
 
 import * as THREE from 'three';
-import { Enemy }     from '../game/Enemy.js';
+import { Enemy } from '../game/Enemy.js';
 import { BossEnemy } from '../game/BossEnemy.js';
 
 // ─── Shared Material Factory ──────────────────────────────────────────────────
@@ -20,11 +20,11 @@ const mat = (color, roughness = 0.9) =>
 // ─── Level Metadata ───────────────────────────────────────────────────────────
 
 export const LEVEL_META = [
-  { number: 1, name: 'Jungle Outpost',   theme: 'Dense jungle at dawn, Red Falcon foot soldiers guard a fortified outpost' },
-  { number: 2, name: 'Underground Lab',  theme: 'Dark underground research corridors, armed scientists and elite guards' },
-  { number: 3, name: 'Commander Gorza',  theme: 'War-room command centre, brutalist concrete, flickering lights' },
-  { number: 4, name: 'Alien Hive',       theme: 'Organic pulsing alien caverns, bioluminescent walls, drone swarms' },
-  { number: 5, name: 'Red Falcon Core',  theme: 'Alien reactor core, massive glowing pillars, end-of-world energy' },
+  { number: 1, name: 'Jungle Outpost', theme: 'Dense jungle at dawn, Red Falcon foot soldiers guard a fortified outpost' },
+  { number: 2, name: 'Underground Lab', theme: 'Dark underground research corridors, armed scientists and elite guards' },
+  { number: 3, name: 'Commander Gorza', theme: 'War-room command centre, brutalist concrete, flickering lights' },
+  { number: 4, name: 'Alien Hive', theme: 'Organic pulsing alien caverns, bioluminescent walls, drone swarms' },
+  { number: 5, name: 'Red Falcon Core', theme: 'Alien reactor core, massive glowing pillars, end-of-world energy' },
 ];
 
 // ─── Level Builders ───────────────────────────────────────────────────────────
@@ -47,25 +47,25 @@ export const LEVEL_META = [
  */
 export function buildLevel1(world, scene, audio, _gemini) {
   const FLOOR = mat(0x3a5a2a); // mossy green
-  const WALL  = mat(0x2d4422); // dark jungle wood
-  const ROOF  = mat(0x1a2a10);
+  const WALL = mat(0x2d4422); // dark jungle wood
+  const ROOF = mat(0x1a2a10);
 
   const SIZE = 40;
   world.addFloor(SIZE, SIZE, FLOOR);
   world.addCeiling(SIZE, SIZE, ROOF, 0, 0, 5);
 
   // Perimeter walls
-  world.addWall(0,       -SIZE/2, SIZE, 1, 5, WALL); // north
-  world.addWall(0,        SIZE/2, SIZE, 1, 5, WALL); // south
-  world.addWall(-SIZE/2,  0,      1, SIZE, 5, WALL); // west
-  world.addWall( SIZE/2,  0,      1, SIZE, 5, WALL); // east
+  world.addWall(0, -SIZE / 2, SIZE, 1, 5, WALL); // north
+  world.addWall(0, SIZE / 2, SIZE, 1, 5, WALL); // south
+  world.addWall(-SIZE / 2, 0, 1, SIZE, 5, WALL); // west
+  world.addWall(SIZE / 2, 0, 1, SIZE, 5, WALL); // east
 
   // Interior cover objects (jungle debris)
   world.addWall(-6, -5, 4, 1.5, 2, mat(0x4a3820)); // log barricade
-  world.addWall( 6, -5, 4, 1.5, 2, mat(0x4a3820));
-  world.addWall( 0,  5, 1.5, 4, 3, mat(0x2d4422)); // bunker pillar
-  world.addWall(-8,  8, 3, 3, 2.5, mat(0x3a5a2a));  // crate stack
-  world.addWall( 8,  8, 3, 3, 2.5, mat(0x3a5a2a));
+  world.addWall(6, -5, 4, 1.5, 2, mat(0x4a3820));
+  world.addWall(0, 5, 1.5, 4, 3, mat(0x2d4422)); // bunker pillar
+  world.addWall(-8, 8, 3, 3, 2.5, mat(0x3a5a2a));  // crate stack
+  world.addWall(8, 8, 3, 3, 2.5, mat(0x3a5a2a));
 
   // Exit marker — glowing green pillar
   const exitGeo = new THREE.CylinderGeometry(0.3, 0.3, 3, 8);
@@ -83,30 +83,30 @@ export function buildLevel1(world, scene, audio, _gemini) {
     scene.add(l);
   };
   addLight(-10, -10, 0x88ff44);
-  addLight( 10,  10, 0x44aa22);
-  addLight(  0,   0, 0xffee88);
+  addLight(10, 10, 0x44aa22);
+  addLight(0, 0, 0xffee88);
 
   // Enemies — 5 foot soldiers with patrol routes
   const enemies = [
     new Enemy(scene, new THREE.Vector3(-10, 0, -5), [
       new THREE.Vector3(-10, 0, -5),
-      new THREE.Vector3(-10, 0,  5),
+      new THREE.Vector3(-10, 0, 5),
     ], audio),
     new Enemy(scene, new THREE.Vector3(10, 0, -5), [
       new THREE.Vector3(10, 0, -5),
-      new THREE.Vector3(10, 0,  5),
+      new THREE.Vector3(10, 0, 5),
     ], audio),
     new Enemy(scene, new THREE.Vector3(0, 0, -10), [
       new THREE.Vector3(-5, 0, -10),
-      new THREE.Vector3( 5, 0, -10),
+      new THREE.Vector3(5, 0, -10),
     ], audio),
     new Enemy(scene, new THREE.Vector3(-8, 0, 5), [
       new THREE.Vector3(-8, 0, 5),
-      new THREE.Vector3( 0, 0, 5),
+      new THREE.Vector3(0, 0, 5),
     ], audio),
     new Enemy(scene, new THREE.Vector3(8, 0, 5), [
-      new THREE.Vector3( 8, 0,  5),
-      new THREE.Vector3( 8, 0, -5),
+      new THREE.Vector3(8, 0, 5),
+      new THREE.Vector3(8, 0, -5),
     ], audio),
   ];
 
@@ -123,33 +123,33 @@ export function buildLevel1(world, scene, audio, _gemini) {
  */
 export function buildLevel2(world, scene, audio, _gemini) {
   const FLOOR = mat(0x1a1a2a);
-  const WALL  = mat(0x2a2a3e);
-  const CEIL  = mat(0x0d0d18);
+  const WALL = mat(0x2a2a3e);
+  const CEIL = mat(0x0d0d18);
 
   const W = 50, D = 50;
   world.addFloor(W, D, FLOOR);
   world.addCeiling(W, D, CEIL, 0, 0, 4);
 
   // Outer walls
-  world.addWall(0,    -D/2, W, 1, 4, WALL);
-  world.addWall(0,     D/2, W, 1, 4, WALL);
-  world.addWall(-W/2,  0,  1, D, 4, WALL);
-  world.addWall( W/2,  0,  1, D, 4, WALL);
+  world.addWall(0, -D / 2, W, 1, 4, WALL);
+  world.addWall(0, D / 2, W, 1, 4, WALL);
+  world.addWall(-W / 2, 0, 1, D, 4, WALL);
+  world.addWall(W / 2, 0, 1, D, 4, WALL);
 
   // Corridor dividers — creates an L-shaped maze feel
-  world.addWall(-10, -8,  1, 16, 4, WALL);
-  world.addWall( 10, -8,  1, 16, 4, WALL);
-  world.addWall(  0,  0, 20,  1, 4, WALL);
-  world.addWall(-15,  8,  1, 14, 4, WALL);
-  world.addWall( 15,  8,  1, 14, 4, WALL);
+  world.addWall(-10, -8, 1, 16, 4, WALL);
+  world.addWall(10, -8, 1, 16, 4, WALL);
+  world.addWall(0, 0, 20, 1, 4, WALL);
+  world.addWall(-15, 8, 1, 14, 4, WALL);
+  world.addWall(15, 8, 1, 14, 4, WALL);
 
   // Lab equipment props (no collision, visual only)
   const addProp = (x, y, z, w, h, d, col) =>
     world.addProp(x, y, z, w, h, d, mat(col, 0.4));
-  addProp(-5, 0.75, -12, 1.5, 1.5, 1,  0x225599); // server rack
-  addProp( 5, 0.75, -12, 1.5, 1.5, 1,  0x225599);
-  addProp(-5, 0.75,  12, 1,   1,   2,  0x334466); // console
-  addProp( 5, 0.75,  12, 1,   1,   2,  0x334466);
+  addProp(-5, 0.75, -12, 1.5, 1.5, 1, 0x225599); // server rack
+  addProp(5, 0.75, -12, 1.5, 1.5, 1, 0x225599);
+  addProp(-5, 0.75, 12, 1, 1, 2, 0x334466); // console
+  addProp(5, 0.75, 12, 1, 1, 2, 0x334466);
 
   // Flickering strip lights (point lights)
   for (let i = -20; i <= 20; i += 10) {
@@ -167,21 +167,21 @@ export function buildLevel2(world, scene, audio, _gemini) {
   scene.add(exitMesh);
 
   // 7 guards in corridor positions
-  const mkEnemy = (x, z, wp) => new Enemy(scene, new THREE.Vector3(x, 0, z), wp.map(([a,b]) => new THREE.Vector3(a, 0, b)), audio);
+  const mkEnemy = (x, z, wp) => new Enemy(scene, new THREE.Vector3(x, 0, z), wp.map(([a, b]) => new THREE.Vector3(a, 0, b)), audio);
   const enemies = [
-    mkEnemy(-5, -15, [[-5,-15],[-5,-5]]),
-    mkEnemy( 5, -15, [[ 5,-15],[ 5,-5]]),
-    mkEnemy( 0,  -5, [[-5,-5], [ 5,-5]]),
-    mkEnemy(-18,  0, [[-18,0], [-18,10]]),
-    mkEnemy( 18,  0, [[ 18,0], [ 18,10]]),
-    mkEnemy(-5,  15, [[-5,15], [ 5,15]]),
-    mkEnemy( 5,  15, [[ 5,15], [-5,15]]),
+    mkEnemy(-5, -15, [[-5, -15], [-5, -5]]),
+    mkEnemy(5, -15, [[5, -15], [5, -5]]),
+    mkEnemy(0, -5, [[-5, -5], [5, -5]]),
+    mkEnemy(-18, 0, [[-18, 0], [-18, 10]]),
+    mkEnemy(18, 0, [[18, 0], [18, 10]]),
+    mkEnemy(-5, 15, [[-5, 15], [5, 15]]),
+    mkEnemy(5, 15, [[5, 15], [-5, 15]]),
   ];
 
   return {
     spawnPos: new THREE.Vector3(0, 1.7, 22),
     enemies,
-    exitPos:  new THREE.Vector3(0, 1.7, -23),
+    exitPos: new THREE.Vector3(0, 1.7, -23),
   };
 }
 
@@ -191,22 +191,22 @@ export function buildLevel2(world, scene, audio, _gemini) {
  */
 export function buildLevel3(world, scene, audio, gemini) {
   const FLOOR = mat(0x1c1c1c);
-  const WALL  = mat(0x2a2a2a);
-  const CEIL  = mat(0x141414);
+  const WALL = mat(0x2a2a2a);
+  const CEIL = mat(0x141414);
 
   const SZ = 35;
   world.addFloor(SZ, SZ, FLOOR);
   world.addCeiling(SZ, SZ, CEIL, 0, 0, 5);
 
-  world.addWall(0,     -SZ/2, SZ, 1, 5, WALL);
-  world.addWall(0,      SZ/2, SZ, 1, 5, WALL);
-  world.addWall(-SZ/2,  0,   1, SZ, 5, WALL);
-  world.addWall( SZ/2,  0,   1, SZ, 5, WALL);
+  world.addWall(0, -SZ / 2, SZ, 1, 5, WALL);
+  world.addWall(0, SZ / 2, SZ, 1, 5, WALL);
+  world.addWall(-SZ / 2, 0, 1, SZ, 5, WALL);
+  world.addWall(SZ / 2, 0, 1, SZ, 5, WALL);
 
   // War-room desks / cover
-  world.addWall(-6,  4, 4, 1.5, 1.2, mat(0x3a3020));
-  world.addWall( 6,  4, 4, 1.5, 1.2, mat(0x3a3020));
-  world.addWall( 0,  0, 2, 2,   1.5, mat(0x1a1a1a));
+  world.addWall(-6, 4, 4, 1.5, 1.2, mat(0x3a3020));
+  world.addWall(6, 4, 4, 1.5, 1.2, mat(0x3a3020));
+  world.addWall(0, 0, 2, 2, 1.5, mat(0x1a1a1a));
 
   // Red accent lights
   const addRed = (x, z) => {
@@ -215,8 +215,8 @@ export function buildLevel3(world, scene, audio, gemini) {
     scene.add(l);
   };
   addRed(-12, -12);
-  addRed( 12, -12);
-  addRed(  0,  0);
+  addRed(12, -12);
+  addRed(0, 0);
 
   // Exit — behind the boss
   const exitMesh = new THREE.Mesh(
@@ -236,13 +236,13 @@ export function buildLevel3(world, scene, audio, gemini) {
     gemini
   );
 
-  const guard1 = new Enemy(scene, new THREE.Vector3(-5, 0, -8), [new THREE.Vector3(-5,0,-8), new THREE.Vector3(-5,0,-2)], audio);
-  const guard2 = new Enemy(scene, new THREE.Vector3( 5, 0, -8), [new THREE.Vector3( 5,0,-8), new THREE.Vector3( 5,0,-2)], audio);
+  const guard1 = new Enemy(scene, new THREE.Vector3(-5, 0, -8), [new THREE.Vector3(-5, 0, -8), new THREE.Vector3(-5, 0, -2)], audio);
+  const guard2 = new Enemy(scene, new THREE.Vector3(5, 0, -8), [new THREE.Vector3(5, 0, -8), new THREE.Vector3(5, 0, -2)], audio);
 
   return {
     spawnPos: new THREE.Vector3(0, 1.7, 14),
-    enemies:  [boss, guard1, guard2],
-    exitPos:  new THREE.Vector3(0, 1.7, -15),
+    enemies: [boss, guard1, guard2],
+    exitPos: new THREE.Vector3(0, 1.7, -15),
   };
 }
 
@@ -252,25 +252,25 @@ export function buildLevel3(world, scene, audio, gemini) {
  */
 export function buildLevel4(world, scene, audio, _gemini) {
   const FLOOR = mat(0x0a1a0f);
-  const WALL  = mat(0x0d2a14);
-  const CEIL  = mat(0x070f08);
+  const WALL = mat(0x0d2a14);
+  const CEIL = mat(0x070f08);
 
   const W = 45, D = 45;
   world.addFloor(W, D, FLOOR);
   world.addCeiling(W, D, CEIL, 0, 0, 5);
 
-  world.addWall(0,    -D/2, W, 1, 5, WALL);
-  world.addWall(0,     D/2, W, 1, 5, WALL);
-  world.addWall(-W/2,  0,  1, D, 5, WALL);
-  world.addWall( W/2,  0,  1, D, 5, WALL);
+  world.addWall(0, -D / 2, W, 1, 5, WALL);
+  world.addWall(0, D / 2, W, 1, 5, WALL);
+  world.addWall(-W / 2, 0, 1, D, 5, WALL);
+  world.addWall(W / 2, 0, 1, D, 5, WALL);
 
   // Organic pillars (alien growths)
   const pillarMat = mat(0x1a3a20, 0.6);
-  world.addWall(-12, -8,  2.5, 2.5, 5, pillarMat);
-  world.addWall( 12, -8,  2.5, 2.5, 5, pillarMat);
-  world.addWall(-12,  8,  2.5, 2.5, 5, pillarMat);
-  world.addWall( 12,  8,  2.5, 2.5, 5, pillarMat);
-  world.addWall(  0,  0,  2,   2,   5, pillarMat);
+  world.addWall(-12, -8, 2.5, 2.5, 5, pillarMat);
+  world.addWall(12, -8, 2.5, 2.5, 5, pillarMat);
+  world.addWall(-12, 8, 2.5, 2.5, 5, pillarMat);
+  world.addWall(12, 8, 2.5, 2.5, 5, pillarMat);
+  world.addWall(0, 0, 2, 2, 5, pillarMat);
 
   // Bioluminescent point lights
   const colors = [0x00ff88, 0x44ff44, 0x88ffaa];
@@ -291,27 +291,27 @@ export function buildLevel4(world, scene, audio, _gemini) {
 
   // 8 alien drones (teal-coloured enemies)
   const mkDrone = (x, z, wp) => {
-    const e = new Enemy(scene, new THREE.Vector3(x, 0, z), wp.map(([a,b]) => new THREE.Vector3(a, 0, b)), audio);
+    const e = new Enemy(scene, new THREE.Vector3(x, 0, z), wp.map(([a, b]) => new THREE.Vector3(a, 0, b)), audio);
     // Tint alien
     e.mesh.traverse(c => { if (c.isMesh) { c.material = c.material.clone(); c.material.color.set(0x005533); } });
     return e;
   };
 
   const enemies = [
-    mkDrone(-15, -10, [[-15,-10],[-15,0]]),
-    mkDrone( 15, -10, [[ 15,-10],[ 15,0]]),
-    mkDrone(-15,  10, [[-15,10], [-15,0]]),
-    mkDrone( 15,  10, [[ 15,10], [ 15,0]]),
-    mkDrone(  0, -15, [[-5,-15], [ 5,-15]]),
-    mkDrone(  0,  15, [[-5, 15], [ 5, 15]]),
-    mkDrone( -8,   0, [[-8,0],   [-8,-8]]),
-    mkDrone(  8,   0, [[ 8,0],   [ 8,-8]]),
+    mkDrone(-15, -10, [[-15, -10], [-15, 0]]),
+    mkDrone(15, -10, [[15, -10], [15, 0]]),
+    mkDrone(-15, 10, [[-15, 10], [-15, 0]]),
+    mkDrone(15, 10, [[15, 10], [15, 0]]),
+    mkDrone(0, -15, [[-5, -15], [5, -15]]),
+    mkDrone(0, 15, [[-5, 15], [5, 15]]),
+    mkDrone(-8, 0, [[-8, 0], [-8, -8]]),
+    mkDrone(8, 0, [[8, 0], [8, -8]]),
   ];
 
   return {
     spawnPos: new THREE.Vector3(0, 1.7, 19),
     enemies,
-    exitPos:  new THREE.Vector3(0, 1.7, -20),
+    exitPos: new THREE.Vector3(0, 1.7, -20),
   };
 }
 
@@ -321,17 +321,17 @@ export function buildLevel4(world, scene, audio, _gemini) {
  */
 export function buildLevel5(world, scene, audio, gemini) {
   const FLOOR = mat(0x0a0008);
-  const WALL  = mat(0x160014);
-  const CEIL  = mat(0x080006);
+  const WALL = mat(0x160014);
+  const CEIL = mat(0x080006);
 
   const SZ = 50;
   world.addFloor(SZ, SZ, FLOOR);
   world.addCeiling(SZ, SZ, CEIL, 0, 0, 8);
 
-  world.addWall(0,     -SZ/2, SZ, 1, 8, WALL);
-  world.addWall(0,      SZ/2, SZ, 1, 8, WALL);
-  world.addWall(-SZ/2,  0,   1, SZ, 8, WALL);
-  world.addWall( SZ/2,  0,   1, SZ, 8, WALL);
+  world.addWall(0, -SZ / 2, SZ, 1, 8, WALL);
+  world.addWall(0, SZ / 2, SZ, 1, 8, WALL);
+  world.addWall(-SZ / 2, 0, 1, SZ, 8, WALL);
+  world.addWall(SZ / 2, 0, 1, SZ, 8, WALL);
 
   // Reactor pillar arcs
   const reactorMat = new THREE.MeshStandardMaterial({
@@ -354,7 +354,7 @@ export function buildLevel5(world, scene, audio, gemini) {
   core.position.set(0, 5, 0);
   scene.add(core);
 
-  [[-20,-20],[20,-20],[-20,20],[20,20]].forEach(([x,z]) => {
+  [[-20, -20], [20, -20], [-20, 20], [20, 20]].forEach(([x, z]) => {
     const l = new THREE.PointLight(0x9900ff, 2, 25);
     l.position.set(x, 5, z);
     scene.add(l);
@@ -380,11 +380,11 @@ export function buildLevel5(world, scene, audio, gemini) {
   // Red Falcon is MASSIVE
   boss.mesh.scale.set(2.5, 2.5, 2.5);
   boss.maxHealth = 250;
-  boss.health    = 250;
+  boss.health = 250;
 
   // 4 alien guards at corners
   const mkAlien = (x, z) => {
-    const e = new Enemy(scene, new THREE.Vector3(x, 0, z), [new THREE.Vector3(x,0,z), new THREE.Vector3(x,0,z-5)], audio);
+    const e = new Enemy(scene, new THREE.Vector3(x, 0, z), [new THREE.Vector3(x, 0, z), new THREE.Vector3(x, 0, z - 5)], audio);
     e.mesh.traverse(c => { if (c.isMesh) { c.material = c.material.clone(); c.material.color.set(0x330022); } });
     return e;
   };
@@ -394,7 +394,7 @@ export function buildLevel5(world, scene, audio, gemini) {
   return {
     spawnPos: new THREE.Vector3(0, 1.7, 20),
     enemies,
-    exitPos:  new THREE.Vector3(0, 1.7, -22),
+    exitPos: new THREE.Vector3(0, 1.7, -22),
   };
 }
 

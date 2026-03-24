@@ -5,15 +5,15 @@
  * and triggers Gemini AI events (taunts, hints, boss monologues, debrief).
  */
 
-import * as THREE  from 'three';
-import { World }   from '../game/World.js';
+import * as THREE from 'three';
+import { World } from '../game/World.js';
 import { LEVEL_BUILDERS, LEVEL_META } from '../levels/index.js';
 
-const TOTAL_LEVELS     = 5;
+const TOTAL_LEVELS = 5;
 const DEATH_HINT_THRESHOLD = 2; // deaths before adaptive hint fires
-const EXIT_RADIUS          = 2.5;
-const SCORE_PER_KILL       = 100;
-const TAUNT_INTERVAL_MS    = 20_000; // enemy taunt every 20s
+const EXIT_RADIUS = 2.5;
+const SCORE_PER_KILL = 100;
+const TAUNT_INTERVAL_MS = 20_000; // enemy taunt every 20s
 
 export class LevelManager {
   /** @type {import('../game/World.js').World} */
@@ -49,8 +49,8 @@ export class LevelManager {
 
   /** Callbacks wired by main.js */
   onLevelComplete = null; // () => void
-  onGameOver      = null; // () => void
-  onVictory       = null; // () => void
+  onGameOver = null; // () => void
+  onVictory = null; // () => void
 
   /**
    * @param {THREE.Scene} scene
@@ -60,12 +60,12 @@ export class LevelManager {
    * @param {import('../ai/GeminiService.js').GeminiService} gemini
    */
   constructor(scene, player, hud, audio, gemini) {
-    this._scene  = scene;
+    this._scene = scene;
     this._player = player;
-    this._hud    = hud;
-    this._audio  = audio;
+    this._hud = hud;
+    this._audio = audio;
     this._gemini = gemini;
-    this._world  = new World(scene);
+    this._world = new World(scene);
   }
 
   // ─── Level Loading ────────────────────────────────────────────────────────
@@ -81,8 +81,8 @@ export class LevelManager {
     this._clearTauntInterval();
 
     const builder = LEVEL_BUILDERS[index];
-    const meta    = LEVEL_META[index];
-    const result  = builder(this._world, this._scene, this._audio, this._gemini);
+    const meta = LEVEL_META[index];
+    const result = builder(this._world, this._scene, this._audio, this._gemini);
 
     this._enemies = result.enemies;
     this._exitPos.copy(result.exitPos);
@@ -171,7 +171,7 @@ export class LevelManager {
 
     // Check if player reached exit
     const distToExit = cam.position.distanceTo(this._exitPos);
-    const allDead    = this._enemies.every((e) => e.isDead);
+    const allDead = this._enemies.every((e) => e.isDead);
 
     if (distToExit < EXIT_RADIUS && allDead) {
       this._triggerLevelComplete();

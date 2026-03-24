@@ -1,14 +1,19 @@
 /**
  * Renderer.js
  * Sets up the Three.js scene, camera, renderer, lighting, and basic FPS geometry.
- * Responsible for the render loop tick — game systems hook into onTick.
+ * Responsible for the render loop tick — game systems hook into onTick / onPostRender.
+ *
+ * Loop order each frame:
+ *   1. onTick callbacks  (game logic: player, enemies, weapon animation)
+ *   2. renderer.render() (main 3D scene)
+ *   3. onPostRender callbacks (weapon viewmodel overlay — must draw AFTER main scene)
  */
 
 import * as THREE from 'three';
 
-const FOV          = 75;
-const NEAR_CLIP    = 0.1;
-const FAR_CLIP     = 500;
+const FOV       = 75;
+const NEAR_CLIP = 0.1;
+const FAR_CLIP  = 500;
 
 export class Renderer {
   /** @type {THREE.WebGLRenderer} */
@@ -21,6 +26,8 @@ export class Renderer {
   _clock;
   /** @type {Function[]} */
   _tickCallbacks = [];
+  /** @type {Function[]} */
+  _postRenderCallbacks = [];
   /** @type {boolean} */
   _running = false;
 
@@ -95,11 +102,20 @@ export class Renderer {
   }
 
   /**
-   * Register a tick callback that receives the delta time in seconds.
+   * Register a tick callback (game logic) — fires BEFORE the scene renders.
    * @param {(delta: number) => void} fn
    */
   onTick(fn) {
     this._tickCallbacks.push(fn);
+  }
+
+  /**
+   * Register a post-render callback — fires AFTER renderer.render().
+   * Use this for overlaid weapon scene so it draws on TOP of the world.
+   * @param {() => void} fn
+   */
+  onPostRender(fn) {
+    this._postRenderCallbacks.push(fn);
   }
 
   /** Start the render loop. */
@@ -109,7 +125,7 @@ export class Renderer {
     this._loop();
   }
 
-  /** Stop the render loop. */
+  /** Stop the render loop (e.g. during overlay screens). */
   stop() {
     this._running = false;
   }
@@ -119,7 +135,14 @@ export class Renderer {
     if (!this._running) return;
     requestAnimationFrame(() => this._loop());
     const delta = Math.min(this._clock.getDelta(), 0.05); // cap at 50ms
+
+    // 1. Game logic tick
     for (const fn of this._tickCallbacks) fn(delta);
+
+    // 2. Main world render
     this.renderer.render(this.scene, this.camera);
+
+    // 3. Weapon overlay (must come AFTER world render)
+    for (const fn of this._postRenderCallbacks) fn();
   }
 }

@@ -6,17 +6,17 @@
  */
 
 export class HUD {
-  _healthBar    = document.getElementById('hud-health-bar');
-  _healthVal    = document.getElementById('hud-health-val');
-  _scoreEl      = document.getElementById('hud-score');
-  _ammoEl       = document.getElementById('hud-ammo');
-  _killfeed     = document.getElementById('hud-killfeed');
-  _tauntEl      = document.getElementById('hud-taunt');
-  _hintEl       = document.getElementById('hud-hint');
-  _levelNameEl  = document.getElementById('hud-level-name');
-  _damageFlash  = null;
-  _tauntTimer   = null;
-  _hintTimer    = null;
+  _healthBar = document.getElementById('hud-health-bar');
+  _healthVal = document.getElementById('hud-health-val');
+  _scoreEl = document.getElementById('hud-score');
+  _ammoEl = document.getElementById('hud-ammo');
+  _killfeed = document.getElementById('hud-killfeed');
+  _tauntEl = document.getElementById('hud-taunt');
+  _hintEl = document.getElementById('hud-hint');
+  _levelNameEl = document.getElementById('hud-level-name');
+  _damageFlash = null;
+  _tauntTimer = null;
+  _hintTimer = null;
 
   constructor() {
     this._damageFlash = document.getElementById('damage-flash');
@@ -125,10 +125,10 @@ export class HUD {
     el.className = 'damage-number';
     el.textContent = `-${damage}`;
 
-    const cx = window.innerWidth  / 2 + (Math.random() - 0.5) * 70;
+    const cx = window.innerWidth / 2 + (Math.random() - 0.5) * 70;
     const cy = window.innerHeight / 2 + (Math.random() - 0.5) * 30;
     el.style.left = `${cx}px`;
-    el.style.top  = `${cy}px`;
+    el.style.top = `${cy}px`;
 
     document.getElementById('game-container').appendChild(el);
     setTimeout(() => el.remove(), 700);

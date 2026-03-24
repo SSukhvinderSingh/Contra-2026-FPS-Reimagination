@@ -8,7 +8,7 @@
 
 import * as THREE from 'three';
 
-const BAR_WIDTH  = 50; // px
+const BAR_WIDTH = 50; // px
 const BAR_HEIGHT = 5;  // px
 
 export class EnemyHealthBars {
@@ -56,7 +56,7 @@ export class EnemyHealthBars {
    * @param {THREE.Camera} camera
    */
   update(camera) {
-    const hw = window.innerWidth  / 2;
+    const hw = window.innerWidth / 2;
     const hh = window.innerHeight / 2;
 
     for (const [enemy, barEl] of this._bars) {
@@ -82,14 +82,14 @@ export class EnemyHealthBars {
 
       // Clamp so bars don't go entirely off screen
       if (sx < -BAR_WIDTH || sx > window.innerWidth + BAR_WIDTH ||
-          sy < 0          || sy > window.innerHeight) {
+        sy < 0 || sy > window.innerHeight) {
         barEl.style.display = 'none';
         continue;
       }
 
       barEl.style.display = 'block';
       barEl.style.left = `${sx - BAR_WIDTH / 2}px`;
-      barEl.style.top  = `${sy}px`;
+      barEl.style.top = `${sy}px`;
 
       // Update fill width
       const pct = Math.max(0, (enemy.health / enemy.maxHealth) * 100);

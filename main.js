@@ -12,6 +12,7 @@
 import { Renderer }         from './src/engine/Renderer.js';
 import { InputHandler }     from './src/engine/InputHandler.js';
 import { AudioManager }     from './src/engine/AudioManager.js';
+import { MusicManager }     from './src/engine/MusicManager.js';
 import { GeminiService }    from './src/ai/GeminiService.js';
 import { Player }           from './src/game/Player.js';
 import { LevelManager }     from './src/game/LevelManager.js';
@@ -19,28 +20,31 @@ import { Weapon }           from './src/game/Weapon.js';
 import { HUD }              from './src/ui/HUD.js';
 import { EnemyHealthBars }  from './src/ui/EnemyHealthBars.js';
 
+// Module-level music (lives across all screens)
+const music = new MusicManager();
+
 // ─── DOM References ───────────────────────────────────────────────────────────
 
 const $ = (id) => document.getElementById(id);
 
 const screens = {
-  apiKey:       $('api-key-screen'),
-  title:        $('title-screen'),
+  apiKey: $('api-key-screen'),
+  title: $('title-screen'),
   missionBrief: $('mission-brief-screen'),
-  debrief:      $('debrief-screen'),
-  gameOver:     $('gameover-screen'),
-  victory:      $('victory-screen'),
+  debrief: $('debrief-screen'),
+  gameOver: $('gameover-screen'),
+  victory: $('victory-screen'),
 };
 
 const gameContainer = $('game-container');
-const canvas        = $('game-canvas');
-const lockOverlay   = $('lock-overlay');
+const canvas = $('game-canvas');
+const lockOverlay = $('lock-overlay');
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let renderer, input, audio, gemini, player, levelManager, hud, weapon, enemyHealthBars;
 let currentLevelIndex = 0;
-let gameActive        = false;
+let gameActive = false;
 
 // ─── Screen Manager ───────────────────────────────────────────────────────────
 
@@ -91,14 +95,14 @@ function typewrite(el, text, speed = 28) {
 // ─── Initialise Systems ───────────────────────────────────────────────────────
 
 function initSystems(apiKey) {
-  audio        = new AudioManager();
-  gemini       = new GeminiService(apiKey);
-  renderer     = new Renderer(canvas);
-  input        = new InputHandler(canvas);
-  hud          = new HUD();
-  player       = new Player(renderer.camera, input, audio);
+  audio = new AudioManager();
+  gemini = new GeminiService(apiKey);
+  renderer = new Renderer(canvas);
+  input = new InputHandler(canvas);
+  hud = new HUD();
+  player = new Player(renderer.camera, input, audio);
   levelManager = new LevelManager(renderer.scene, player, hud, audio, gemini);
-  weapon       = new Weapon(renderer.renderer, renderer.camera);
+  weapon          = new Weapon(renderer.renderer, renderer.camera, input);
   enemyHealthBars = new EnemyHealthBars();
 
   // Expose health bars to LevelManager so it can track new enemies
@@ -108,10 +112,10 @@ function initSystems(apiKey) {
 
   // Wire level events
   levelManager.onLevelComplete = () => showDebrief(false);
-  levelManager.onGameOver      = () => showGameOver();
-  levelManager.onVictory       = () => showVictory();
+  levelManager.onGameOver = () => showGameOver();
+  levelManager.onVictory = () => showVictory();
 
-  // Game tick
+  // Game tick — update logic only (rendering happens in onPostRender)
   renderer.onTick((delta) => {
     if (!gameActive) return;
     const isMoving = input.isForward() || input.isBackward() || input.isLeft() || input.isRight();
@@ -119,9 +123,14 @@ function initSystems(apiKey) {
     levelManager.update(delta);
     weapon.setMoving(isMoving && input.isPointerLocked);
     weapon.update(delta);
-    weapon.renderOnTop();
     hud.setHealth(player.health, player.maxHealth);
     enemyHealthBars.update(renderer.camera);
+  });
+
+  // Post-render — weapon overlay draws AFTER the main scene
+  renderer.onPostRender(() => {
+    if (!gameActive) return;
+    weapon.renderOnTop();
   });
 
   // Pointer lock UI
@@ -147,10 +156,10 @@ async function showMissionBrief(levelIndex) {
 
   const meta = (await import('./src/levels/index.js')).LEVEL_META[levelIndex];
 
-  $('brief-level-num').textContent  = meta.number;
+  $('brief-level-num').textContent = meta.number;
   $('brief-level-name').textContent = meta.name;
 
-  const textEl    = $('brief-typing-text');
+  const textEl = $('brief-typing-text');
   const loadingEl = $('brief-loading');
   const deployBtn = $('brief-deploy-btn');
 
@@ -195,22 +204,22 @@ async function showDebrief(isVictory) {
   input.releaseLock();
   renderer.stop();
 
-  const meta  = (await import('./src/levels/index.js')).LEVEL_META[currentLevelIndex];
+  const meta = (await import('./src/levels/index.js')).LEVEL_META[currentLevelIndex];
   const stats = {
-    kills:           player.killCount,
-    accuracy:        player.accuracy,
+    kills: player.killCount,
+    accuracy: player.accuracy,
     healthRemaining: Math.round((player.health / player.maxHealth) * 100),
   };
 
-  $('db-kills').textContent    = stats.kills;
+  $('db-kills').textContent = stats.kills;
   $('db-accuracy').textContent = `${stats.accuracy}%`;
-  $('db-health').textContent   = `${stats.healthRemaining}%`;
+  $('db-health').textContent = `${stats.healthRemaining}%`;
   $('debrief-title').textContent = isVictory ? 'All Objectives Complete' : 'Sector Cleared';
 
-  const aiTextEl    = $('debrief-ai-text');
-  const loadingEl   = $('debrief-loading');
-  const nextBtn     = $('debrief-next-btn');
-  const restartBtn  = $('debrief-restart-btn');
+  const aiTextEl = $('debrief-ai-text');
+  const loadingEl = $('debrief-loading');
+  const nextBtn = $('debrief-next-btn');
+  const restartBtn = $('debrief-restart-btn');
 
   aiTextEl.textContent = '';
   loadingEl.classList.remove('hidden');
@@ -253,6 +262,7 @@ function showGameOver() {
   $('go-menu-btn').onclick = () => {
     currentLevelIndex = 0;
     renderer.start();
+    music.start();
     showScreen('title');
   };
 }
@@ -273,6 +283,7 @@ async function showVictory() {
   $('vic-menu-btn').onclick = () => {
     currentLevelIndex = 0;
     renderer.start();
+    music.start();
     showScreen('title');
   };
 }
@@ -290,15 +301,16 @@ function boot() {
       return;
     }
     initSystems(key);
+    music.start(); // first user gesture — safe to create AudioContext now
     showScreen('title');
   });
 
-  // Allow Enter key on API input
   $('api-key-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') $('start-game-btn').click();
   });
 
   $('menu-play-btn').addEventListener('click', () => {
+    music.stop(); // stop music when going into mission brief
     showMissionBrief(0);
   });
 
@@ -307,7 +319,91 @@ function boot() {
     panel.classList.toggle('hidden');
   });
 
+  // Mid-game exit button — appears on lock overlay when Esc is pressed
+  $('lock-exit-btn').addEventListener('click', () => {
+    gameActive = false;
+    if (renderer) renderer.stop();
+    if (input)    input.releaseLock();
+    currentLevelIndex = 0;
+    if (renderer) renderer.start();
+    music.start();
+    showScreen('title');
+  });
+
   bindBriefDeploy();
+  _startTitleParticles();
+}
+
+// ─── Title Particle Animation ─────────────────────────────────────────────────
+
+/**
+ * Animated bullet tracer particles flying across the title screen.
+ * Runs on its own rAF loop, only draws when title screen is active.
+ */
+function _startTitleParticles() {
+  const canvas = document.getElementById('title-particles');
+  if (!canvas) return;
+  const ctx   = canvas.getContext('2d');
+  const COUNT = 55;
+  const ptcls = [];
+
+  const resize = () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < COUNT; i++) ptcls.push(_makeParticle(canvas, true));
+
+  function tick() {
+    if (!document.getElementById('title-screen')?.classList.contains('active')) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < ptcls.length; i++) {
+      const p = ptcls[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= 0.004;
+
+      if (p.alpha <= 0 || p.x > canvas.width + 60) {
+        ptcls[i] = _makeParticle(canvas, false);
+        continue;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.strokeStyle = '#ff2233';
+      ctx.lineWidth   = 1.5;
+      ctx.shadowColor = '#ff2233';
+      ctx.shadowBlur  = 6;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - p.vx * p.len, p.y - p.vy * p.len);
+      ctx.stroke();
+      ctx.restore();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/** @private */
+function _makeParticle(canvas, randomStart = false) {
+  const angle = (Math.random() * 30 - 15) * (Math.PI / 180);
+  const speed = 3 + Math.random() * 5;
+  return {
+    x:     randomStart ? Math.random() * canvas.width : -20,
+    y:     Math.random() * canvas.height,
+    vx:    Math.cos(angle) * speed,
+    vy:    Math.sin(angle) * speed,
+    len:   4 + Math.random() * 8,
+    alpha: 0.3 + Math.random() * 0.5,
+  };
 }
 
 boot();
+
