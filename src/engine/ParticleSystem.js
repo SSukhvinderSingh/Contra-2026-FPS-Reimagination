@@ -120,6 +120,7 @@ export class ParticleSystem {
   }
 
   start() {
+    this._canvas.style.display = ''; // make canvas visible
     if (this._rafId) return;
     const loop = (ts) => {
       this._rafId  = requestAnimationFrame(loop);
@@ -133,6 +134,9 @@ export class ParticleSystem {
 
   stop() {
     if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+    // Clear and hide so the frozen last frame doesn't overlay the game canvas
+    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    this._canvas.style.display = 'none';
   }
 
   _tick(dt) {
