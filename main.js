@@ -19,6 +19,7 @@ import { LevelManager }     from './src/game/LevelManager.js';
 import { Weapon }           from './src/game/Weapon.js';
 import { HUD }              from './src/ui/HUD.js';
 import { EnemyHealthBars }  from './src/ui/EnemyHealthBars.js';
+import { Leaderboard }      from './src/engine/Leaderboard.js';
 
 // Module-level music (lives across all screens)
 const music = new MusicManager();
@@ -44,7 +45,9 @@ const lockOverlay = $('lock-overlay');
 
 let renderer, input, audio, gemini, player, levelManager, hud, weapon, enemyHealthBars;
 let currentLevelIndex = 0;
-let gameActive = false;
+let gameActive        = false;
+/** @type {number|null} - timestamp when level 1 started (for total run time) */
+let _gameStartTime    = null;
 
 // ─── Screen Manager ───────────────────────────────────────────────────────────
 
@@ -189,10 +192,11 @@ function startLevel(index) {
   try {
     gameActive = false;
     music.stop();
+    // Start the run timer only when deploying to level 1
+    if (index === 0) _gameStartTime = Date.now();
     levelManager.loadLevel(index);
     showScreen('game');
     lockOverlay.classList.remove('hidden');
-    // Small delay lets the overlay render before we lock
     setTimeout(() => {
       canvas.requestPointerLock();
       gameActive = true;
@@ -278,6 +282,10 @@ async function showVictory() {
   gameActive = false;
   input.releaseLock();
 
+  // Capture run time immediately
+  const runTimeMs = _gameStartTime ? Date.now() - _gameStartTime : 0;
+  _gameStartTime  = null; // reset for next run
+
   const aiTextEl = $('victory-ai-text');
   aiTextEl.textContent = '';
   showScreen('victory');
@@ -285,12 +293,58 @@ async function showVictory() {
   const speech = await gemini.getVictorySpeech();
   await typewrite(aiTextEl, speech);
 
-  $('vic-menu-btn').onclick = () => {
+  // Show callsign input after speech completes
+  const callsignWrap = $('callsign-wrap');
+  const callsignInput = $('callsign-input');
+  const submitBtn = $('callsign-submit-btn');
+  const menuBtn = $('vic-menu-btn');
+
+  callsignWrap.classList.remove('hidden');
+  callsignInput.value = '';
+  callsignInput.focus();
+
+  const handleSubmit = () => {
+    const name = callsignInput.value.trim() || 'OPERATIVE';
+    Leaderboard.save(name, runTimeMs);
+    callsignWrap.classList.add('hidden');
+    menuBtn.classList.remove('hidden');
+    renderLeaderboard();
+  };
+
+  submitBtn.onclick = handleSubmit;
+  callsignInput.onkeydown = (e) => { if (e.key === 'Enter') handleSubmit(); };
+
+  menuBtn.onclick = () => {
     currentLevelIndex = 0;
     renderer.start();
     music.start();
     showScreen('title');
+    renderLeaderboard();
   };
+}
+
+// ─── Leaderboard Renderer ───────────────────────────────────────────────────────────
+
+/**
+ * Re-renders the #lb-list element from localStorage.
+ * Call whenever a score is saved or the title screen is shown.
+ */
+function renderLeaderboard() {
+  const list    = $('lb-list');
+  const entries = Leaderboard.load();
+
+  if (entries.length === 0) {
+    list.innerHTML = '<li class="lb-empty">No entries yet — be the first!</li>';
+    return;
+  }
+
+  list.innerHTML = entries.map((e, i) => `
+    <li class="lb-row">
+      <span class="lb-rank">${i + 1}</span>
+      <span class="lb-name">${e.name}</span>
+      <span class="lb-time">${Leaderboard.format(e.timeMs)}</span>
+    </li>
+  `).join('');
 }
 
 // ─── Boot Sequence ────────────────────────────────────────────────────────────
@@ -308,6 +362,7 @@ function boot() {
     initSystems(key);
     music.start(); // first user gesture — safe to create AudioContext now
     showScreen('title');
+    renderLeaderboard(); // populate leaderboard from localStorage
   });
 
   $('api-key-input').addEventListener('keydown', (e) => {

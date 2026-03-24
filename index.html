@@ -56,24 +56,38 @@
          TITLE / MAIN MENU SCREEN
     ═══════════════════════════════════════════ -->
     <div id="title-screen" class="overlay">
-      <div class="overlay-panel">
-        <div class="logo-wrap">
-          <span class="logo-contra">CONTRA</span>
-          <span class="logo-year">2026</span>
+      <div class="title-layout">
+        <!-- Left: menu -->
+        <div class="overlay-panel">
+          <div class="logo-wrap">
+            <span class="logo-contra">CONTRA</span>
+            <span class="logo-year">2026</span>
+          </div>
+          <p class="tagline">Red Falcon Never Died.</p>
+          <nav class="menu-nav">
+            <button id="menu-play-btn" class="btn-primary">▶ MISSION START</button>
+            <button id="menu-controls-btn" class="btn-secondary">⌨ CONTROLS</button>
+          </nav>
+          <div id="controls-panel" class="controls-panel hidden">
+            <table class="controls-table">
+              <tr><td>Move</td><td><kbd>W A S D</kbd></td></tr>
+              <tr><td>Look</td><td>Mouse</td></tr>
+              <tr><td>Shoot</td><td><kbd>Left Click</kbd></td></tr>
+              <tr><td>Sprint</td><td><kbd>Shift</kbd></td></tr>
+              <tr><td>Pause</td><td><kbd>Esc</kbd></td></tr>
+            </table>
+          </div>
         </div>
-        <p class="tagline">Red Falcon Never Died.</p>
-        <nav class="menu-nav">
-          <button id="menu-play-btn" class="btn-primary">▶ MISSION START</button>
-          <button id="menu-controls-btn" class="btn-secondary">⌨ CONTROLS</button>
-        </nav>
-        <div id="controls-panel" class="controls-panel hidden">
-          <table class="controls-table">
-            <tr><td>Move</td><td><kbd>W A S D</kbd></td></tr>
-            <tr><td>Look</td><td>Mouse</td></tr>
-            <tr><td>Shoot</td><td><kbd>Left Click</kbd></td></tr>
-            <tr><td>Sprint</td><td><kbd>Shift</kbd></td></tr>
-            <tr><td>Pause</td><td><kbd>Esc</kbd></td></tr>
-          </table>
+
+        <!-- Right: leaderboard -->
+        <div id="lb-panel">
+          <div class="lb-header">
+            <span class="lb-icon">🏆</span>
+            <span>FASTEST OPERATIVES</span>
+          </div>
+          <ol id="lb-list">
+            <li class="lb-empty">No entries yet — be the first!</li>
+          </ol>
         </div>
       </div>
     </div>
@@ -140,7 +154,18 @@
         <h1 class="victory-title">RED FALCON DESTROYED</h1>
         <p class="victory-sub">Earth is free. For now.</p>
         <div id="victory-ai-text" class="brief-text typewriter" style="margin-top:1rem"></div>
-        <button id="vic-menu-btn" class="btn-primary" style="margin-top:2rem">⌂ MAIN MENU</button>
+
+        <!-- Callsign entry (shown after AI speech completes) -->
+        <div id="callsign-wrap" class="hidden">
+          <p class="callsign-label">ENTER YOUR CALLSIGN FOR THE LEADERBOARD</p>
+          <div class="callsign-row">
+            <input id="callsign-input" type="text" maxlength="16"
+              placeholder="OPERATIVE" autocomplete="off" spellcheck="false" />
+            <button id="callsign-submit-btn" class="btn-primary">SUBMIT</button>
+          </div>
+        </div>
+
+        <button id="vic-menu-btn" class="btn-primary hidden" style="margin-top:2rem">⌂ MAIN MENU</button>
       </div>
     </div>
 
