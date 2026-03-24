@@ -468,22 +468,35 @@ kbd {
 
 /* ─── Crosshair ───────────────────────────────────────────────── */
 #hud-crosshair {
-  position: fixed;
+  position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 20px; height: 20px;
+  width: 24px; height: 24px;
+  pointer-events: none;
+  z-index: 15;
 }
 .ch-h {
   position: absolute;
-  width: 100%; height: 1px;
-  background: rgba(255,255,255,0.7);
+  width: 100%; height: 2px;
+  background: rgba(255,255,255,0.85);
   top: 50%; transform: translateY(-50%);
+  box-shadow: 0 0 4px rgba(255,255,255,0.5);
 }
 .ch-v {
   position: absolute;
-  height: 100%; width: 1px;
-  background: rgba(255,255,255,0.7);
+  height: 100%; width: 2px;
+  background: rgba(255,255,255,0.85);
   left: 50%; transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+.ch-dot {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: #ff2233;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px #ff2233;
 }
 
 /* ─── Kill Feed ───────────────────────────────────────────────── */
@@ -573,6 +586,18 @@ kbd {
   font-size: 0.75rem;
   color: var(--col-text-muted);
   margin-top: 0.5rem;
+}
+/* Exit button inside lock overlay — stops click from propagating to overlay */
+#lock-exit-btn {
+  margin-top: 2rem;
+  pointer-events: all;
+  z-index: 11;
+  position: relative;
+}
+#lock-exit-btn:hover {
+  background: rgba(255,34,51,0.15);
+  border-color: var(--col-red);
+  color: var(--col-red);
 }
 
 /* ─── Damage Flash ────────────────────────────────────────────── */

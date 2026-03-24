@@ -325,8 +325,10 @@ function boot() {
   });
 
   // Mid-game exit button — appears on lock overlay when Esc is pressed
-  $('lock-exit-btn').addEventListener('click', () => {
+  $('lock-exit-btn').addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent lock overlay from re-acquiring pointer lock
     gameActive = false;
+    document.exitPointerLock?.();
     if (renderer) renderer.stop();
     if (input)    input.releaseLock();
     currentLevelIndex = 0;

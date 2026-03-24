@@ -162,10 +162,6 @@
 
         <div id="hud-center">
           <div id="hud-level-name">LEVEL 1 · JUNGLE OUTPOST</div>
-          <div id="hud-crosshair">
-            <div class="ch-h"></div>
-            <div class="ch-v"></div>
-          </div>
         </div>
 
         <div id="hud-right">
@@ -185,10 +181,18 @@
         <div id="hud-hint"></div>
       </div>
 
-      <!-- Pointer lock overlay (click to start) -->
+      <!-- Pointer lock overlay (click to resume / exit) -->
       <div id="lock-overlay">
         <p>Click anywhere to enter battle</p>
         <p class="lock-sub">Press <kbd>Esc</kbd> to pause</p>
+        <button id="lock-exit-btn" class="btn-secondary">✕ EXIT TO MENU</button>
+      </div>
+
+      <!-- Crosshair — absolute center of viewport -->
+      <div id="hud-crosshair">
+        <div class="ch-h"></div>
+        <div class="ch-v"></div>
+        <div class="ch-dot"></div>
       </div>
     </div>
 
