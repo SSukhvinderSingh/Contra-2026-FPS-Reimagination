@@ -4,8 +4,8 @@
  * Renders onto a full-screen 2D canvas sitting behind all overlays.
  */
 
-const TRACER_COUNT  = 18;   // horizontal bullet streaks
-const SPARK_COUNT   = 35;   // small floating debris particles
+const TRACER_COUNT = 18;   // horizontal bullet streaks
+const SPARK_COUNT = 35;   // small floating debris particles
 const TWINKLE_COUNT = 50;   // faint distant stars/static
 
 /** @param {number} min @param {number} max @returns {number} */
@@ -15,16 +15,16 @@ class Tracer {
   constructor(w, h) { this.reset(w, h); }
 
   reset(w, h) {
-    this.x     = rand(-50, 0);
-    this.y     = rand(0, h);
+    this.x = rand(-50, 0);
+    this.y = rand(0, h);
     this.speed = rand(600, 1800);
-    this.len   = rand(60, 220);
+    this.len = rand(60, 220);
     this.alpha = rand(0.3, 0.9);
-    this.w     = w;
+    this.w = w;
   }
 
   update(dt) { this.x += this.speed * dt; }
-  isDone()   { return this.x - this.len > this.w; }
+  isDone() { return this.x - this.len > this.w; }
 
   draw(ctx) {
     const grad = ctx.createLinearGradient(this.x - this.len, 0, this.x, 0);
@@ -32,7 +32,7 @@ class Tracer {
     grad.addColorStop(0.6, `rgba(255,180,80,${this.alpha})`);
     grad.addColorStop(1, `rgba(255,255,255,${this.alpha})`);
     ctx.strokeStyle = grad;
-    ctx.lineWidth   = rand(0.8, 2.2);
+    ctx.lineWidth = rand(0.8, 2.2);
     ctx.beginPath();
     ctx.moveTo(this.x - this.len, this.y);
     ctx.lineTo(this.x, this.y);
@@ -44,21 +44,21 @@ class Spark {
   constructor(w, h) { this.reset(w, h); this.x = rand(0, w); this.y = rand(0, h); }
 
   reset(w, h) {
-    this.x    = rand(0, w);
-    this.y    = rand(-10, 0);
-    this.vy   = rand(20, 70);
-    this.vx   = rand(-15, 15);
+    this.x = rand(0, w);
+    this.y = rand(-10, 0);
+    this.vy = rand(20, 70);
+    this.vx = rand(-15, 15);
     this.size = rand(1.5, 3.5);
     this.alpha = rand(0.2, 0.7);
-    this.life  = rand(3, 9);
-    this.age   = 0;
-    this.hue   = Math.random() > 0.5 ? '255,34,51' : '255,180,60';
+    this.life = rand(3, 9);
+    this.age = 0;
+    this.hue = Math.random() > 0.5 ? '255,34,51' : '255,180,60';
   }
 
   update(dt, w, h) {
     this.age += dt;
-    this.x   += this.vx * dt;
-    this.y   += this.vy * dt;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
     if (this.age > this.life || this.y > h + 10) this.reset(w, h);
   }
 
@@ -74,9 +74,9 @@ class Spark {
 
 class Twinkle {
   constructor(w, h) {
-    this.x     = rand(0, w);
-    this.y     = rand(0, h);
-    this.r     = rand(0.5, 1.5);
+    this.x = rand(0, w);
+    this.y = rand(0, h);
+    this.r = rand(0.5, 1.5);
     this.phase = rand(0, Math.PI * 2);
     this.speed = rand(0.8, 2.5);
   }
@@ -94,13 +94,13 @@ export class ParticleSystem {
   /** @param {HTMLCanvasElement} canvas */
   constructor(canvas) {
     this._canvas = canvas;
-    this._ctx    = canvas.getContext('2d');
-    this._tracers  = [];
-    this._sparks   = [];
+    this._ctx = canvas.getContext('2d');
+    this._tracers = [];
+    this._sparks = [];
     this._twinkles = [];
-    this._rafId    = null;
+    this._rafId = null;
     this._lastTime = 0;
-    this._elapsed  = 0;
+    this._elapsed = 0;
 
     this._resize();
     window.addEventListener('resize', () => this._resize());
@@ -108,14 +108,14 @@ export class ParticleSystem {
   }
 
   _resize() {
-    this._canvas.width  = window.innerWidth;
+    this._canvas.width = window.innerWidth;
     this._canvas.height = window.innerHeight;
   }
 
   _build() {
     const { width: w, height: h } = this._canvas;
-    this._tracers  = Array.from({ length: TRACER_COUNT  }, () => new Tracer(w, h));
-    this._sparks   = Array.from({ length: SPARK_COUNT   }, () => new Spark(w, h));
+    this._tracers = Array.from({ length: TRACER_COUNT }, () => new Tracer(w, h));
+    this._sparks = Array.from({ length: SPARK_COUNT }, () => new Spark(w, h));
     this._twinkles = Array.from({ length: TWINKLE_COUNT }, () => new Twinkle(w, h));
   }
 
@@ -123,10 +123,10 @@ export class ParticleSystem {
     this._canvas.style.display = ''; // make canvas visible
     if (this._rafId) return;
     const loop = (ts) => {
-      this._rafId  = requestAnimationFrame(loop);
-      const dt     = Math.min((ts - this._lastTime) / 1000, 0.05);
+      this._rafId = requestAnimationFrame(loop);
+      const dt = Math.min((ts - this._lastTime) / 1000, 0.05);
       this._lastTime = ts;
-      this._elapsed  += dt;
+      this._elapsed += dt;
       this._tick(dt);
     };
     this._rafId = requestAnimationFrame((ts) => { this._lastTime = ts; loop(ts); });
